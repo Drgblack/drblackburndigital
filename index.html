@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Blackburn Digital GmbH</title>
+<meta name="description" content="Dr. Blackburn Digital GmbH — a digital products company based in Saarland, Germany, building and operating focused subscription software.">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --text: #1c1e21;
+    --text-muted: #5b6068;
+    --accent: #1e3a5f;
+    --accent-soft: #e8eef4;
+    --border: #e4e2dd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161a;
+      --surface: #1b1e23;
+      --text: #eceef0;
+      --text-muted: #9ba1a8;
+      --accent: #7fa8d1;
+      --accent-soft: #212a35;
+      --border: #2b2f36;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a;
+    --surface: #1b1e23;
+    --text: #eceef0;
+    --text-muted: #9ba1a8;
+    --accent: #7fa8d1;
+    --accent-soft: #212a35;
+    --border: #2b2f36;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  header {
+    padding: 96px 0 64px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 28px;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.2;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .tagline {
+    font-size: 18px;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 46ch;
+    line-height: 1.55;
+  }
+
+  section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    font-weight: 600;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0 0 16px;
+  }
+  p:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 10px 20px;
+    margin: 0;
+  }
+  dt {
+    color: var(--text-muted);
+    font-size: 14px;
+    padding-top: 2px;
+  }
+  dd {
+    margin: 0;
+    font-size: 15px;
+  }
+  .todo {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  a:hover { border-bottom-color: currentColor; }
+
+  footer {
+    padding: 40px 0 64px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 520px) {
+    dl { grid-template-columns: 1fr; gap: 4px 0; }
+    dt { padding-top: 10px; }
+    header { padding: 64px 0 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="mark">DB</div>
+    <h1>Dr. Blackburn Digital GmbH</h1>
+    <p class="tagline">A digital products company based in Saarland, Germany, building and operating focused subscription software.</p>
+  </header>
+
+  <section>
+    <h2>About</h2>
+    <p>Dr. Blackburn Digital GmbH develops and operates digital subscription products, with a focus on education and specialist training tools. The company is based in Püttlingen, Saarland, and is registered in Germany.</p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <div class="card">
+      <dl>
+        <dt>General enquiries</dt>
+        <dd><a href="mailto:info@drblackburndigital.com">info@drblackburndigital.com</a></dd>
+        <dt>Registered office</dt>
+        <dd>Püttlingen, Saarland, Germany</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <h2>Impressum</h2>
+    <div class="card">
+      <dl>
+        <dt>Company</dt>
+        <dd>Dr. Blackburn Digital GmbH</dd>
+        <dt>Owner &amp; CEO</dt>
+        <dd>Dr. Harvey Gregory Scott Blackburn</dd>
+        <dt>Address</dt>
+        <dd>Erich-Kästner-Straße 8, 66346 Püttlingen, Germany</dd>
+        <dt>Commercial Register</dt>
+        <dd class="todo">[Amtsgericht — HRB number pending]</dd>
+        <dt>VAT ID</dt>
+        <dd class="todo">[USt-IdNr. — pending]</dd>
+        <dt>Contact</dt>
+        <dd><a href="mailto:info@drblackburndigital.com">info@drblackburndigital.com</a></dd>
+      </dl>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 Dr. Blackburn Digital GmbH. All rights reserved.
+  </footer>
+
+</div>
+</body>
+</html>
