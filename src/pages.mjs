@@ -2,6 +2,7 @@ import { getLegalPages } from './legal.mjs';
 import { responseTime } from './contact-copy.mjs';
 import { refinePages } from './refinements.mjs';
 import { getGermanPages } from './german.mjs';
+import { getGermanInsights } from './insights-de.mjs';
 export const company = 'Dr. Blackburn Digital GmbH i.G.';
 export const origin = 'https://www.drblackburndigital.com';
 export const email = 'info@drblackburndigital.com';
@@ -108,7 +109,7 @@ export function getPages() {
   for (const page of [home, portfolio]) page.body = page.body.replaceAll('width="720" height="1280"', 'width="711" height="909"');
   const insights = refinePages({ home, greg, portfolio, partnerships, contact });
   const german = getGermanPages(contact);
-  const pages = [home, greg, portfolio, partnerships, contact, companyPage, impressum, privacy, ...insights, ...german, ...germanLegal];
+  const pages = [home, greg, portfolio, partnerships, contact, companyPage, impressum, privacy, ...insights, ...german, ...germanLegal, ...getGermanInsights()];
   for (const page of pages) {
     page.body = page.body.replace(/<a([^>]*href="https?:[^>]+)>([\s\S]*?)<\/a>/g, (_, attrs, content) => {
       const icon = content.includes('aria-hidden="true">↗') ? '' : ` ${arrow}`;

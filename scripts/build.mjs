@@ -48,16 +48,18 @@ function schema(page) {
 }
 
 const navLinks = [['/portfolio/', 'Portfolio'], ['/partnerships/', 'Partnerships'], ['/greg-blackburn/', 'Greg Blackburn'], ['/insights/', 'Insights'], ['/contact/', 'Contact']];
-const pairs = [['/', '/de/'], ['/partnerships/', '/de/partnerschaften/'], ['/contact/', '/de/kontakt/'], ['/impressum/', '/de/impressum/'], ['/privacy/', '/de/datenschutz/']];
+// Only published translations can create a language switch or hreflang alternate.
+const pairs = getPages().filter(page => page.lang === 'de' && page.englishPath).map(page => [page.englishPath, page.path]);
 function localizedLink(href, label, de) {
   if (!de) return [href, label];
-  const translated = { '/': ['/de/', 'Startseite'], '/partnerships/': ['/de/partnerschaften/', 'Partnerschaften'], '/contact/': ['/de/kontakt/', 'Kontakt'], '/privacy/': ['/de/datenschutz/', 'Datenschutz'], '/impressum/': ['/de/impressum/', 'Impressum'] };
+  const translated = { '/': ['/de/', 'Startseite'], '/partnerships/': ['/de/partnerschaften/', 'Partnerschaften'], '/contact/': ['/de/kontakt/', 'Kontakt'], '/privacy/': ['/de/datenschutz/', 'Datenschutz'], '/impressum/': ['/de/impressum/', 'Impressum'], '/insights/': ['/de/perspektiven/', 'Perspektiven'] };
   return translated[href] || [href, `${label === 'Company' ? 'Unternehmen' : label === 'Insights' ? 'Perspektiven' : label} (EN)`];
 }
-function navigation(page) { return navLinks.map(([href, label]) => localizedLink(href, label, page.lang === 'de')).map(([href, label]) => `<a href="${href}"${page.path === href || (href === '/insights/' && page.parent?.[0] === href) ? ' aria-current="page"' : ''}${href.endsWith('/contact/') || href.endsWith('/kontakt/') ? ' class="nav-contact"' : ''}>${label}</a>`).join(''); }
+function navigation(page) { return navLinks.map(([href, label]) => localizedLink(href, label, page.lang === 'de')).map(([href, label]) => `<a href="${href}"${page.path === href || page.parent?.[0] === href ? ' aria-current="page"' : ''}${href.endsWith('/contact/') || href.endsWith('/kontakt/') ? ' class="nav-contact"' : ''}>${label}</a>`).join(''); }
 function languageLinks(page) {
   const pair = pairs.find(pair => pair.includes(page.path));
-  return `<nav class="language-switch" aria-label="${page.lang === 'de' ? 'Sprache' : 'Language'}"><a lang="en" hreflang="en" href="${pair?.[0] || page.path}"${page.lang !== 'de' ? ' aria-current="true"' : ''}>EN</a><span aria-hidden="true">/</span><a lang="de" hreflang="de" href="${pair?.[1] || '/de/'}"${page.lang === 'de' ? ' aria-current="true"' : ''}${!pair ? ' title="Deutsche Startseite"' : ''}>DE</a></nav>`;
+  if (!pair) return '';
+  return `<nav class="language-switch" aria-label="${page.lang === 'de' ? 'Sprache' : 'Language'}"><a lang="en" hreflang="en" href="${pair[0]}"${page.lang !== 'de' ? ' aria-current="true"' : ''}>EN</a><span aria-hidden="true">/</span><a lang="de" hreflang="de" href="${pair[1]}"${page.lang === 'de' ? ' aria-current="true"' : ''}>DE</a></nav>`;
 }
 function alternateTags(page) {
   const pair = pairs.find(pair => pair.includes(page.path));

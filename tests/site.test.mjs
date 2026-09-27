@@ -202,7 +202,7 @@ test('confirmed formation status and Communardo role are used without registry i
 
 test('translated pages have reciprocal language alternates and retain the shared form contract', async () => {
   for (const root of roots) {
-    for (const [en, de] of [['/', '/de/'], ['/partnerships/', '/de/partnerschaften/'], ['/contact/', '/de/kontakt/'], ['/impressum/', '/de/impressum/'], ['/privacy/', '/de/datenschutz/']]) {
+    for (const [en, de] of [['/', '/de/'], ['/partnerships/', '/de/partnerschaften/'], ['/contact/', '/de/kontakt/'], ['/impressum/', '/de/impressum/'], ['/privacy/', '/de/datenschutz/'], ['/insights/', '/de/perspektiven/'], ['/insights/reviewing-a-learning-product/', '/de/perspektiven/lernprodukt-pruefen/'], ['/insights/knowledge-before-ai/', '/de/perspektiven/wissensgrundlage-vor-ki/']]) {
       for (const route of [en, de]) {
         const html = await readFile(path.join(root, route, 'index.html'), 'utf8');
         assert.match(html, route === de ? /<html lang="de">/ : /<html lang="en">/);
@@ -218,6 +218,30 @@ test('translated pages have reciprocal language alternates and retain the shared
     assert.match(contact, /href="\/de\/datenschutz\/"/);
     assert.doesNotMatch(contact, /href="\/privacy\/"/);
     assert.deepEqual([...contact.matchAll(/<(?:input|textarea|select)[^>]* name="([^"]+)"/g)].map(m => m[1]), ['name', 'organisation', 'email', 'type', 'message', 'website']);
+  }
+});
+
+test('language switches stay on the matching page and are absent without a translation', async () => {
+  for (const root of roots) {
+    const pages = getPages();
+    for (const page of pages) {
+      const counterpart = page.lang === 'de' ? pages.find(p => p.path === page.englishPath) : pages.find(p => p.englishPath === page.path);
+      const html = await readFile(path.join(root, page.path, 'index.html'), 'utf8');
+      const menu = html.match(/<nav class="language-switch"[\s\S]*?<\/nav>/)?.[0];
+      if (!counterpart) {
+        assert.equal(menu, undefined, `Untranslated ${page.path} must not offer an unrelated destination`);
+      } else {
+        assert.ok(menu?.includes(`href="${counterpart.path}"`), `${page.path}: missing direct translation link`);
+      }
+    }
+    for (const [en, de] of [['/insights/reviewing-a-learning-product/', '/de/perspektiven/lernprodukt-pruefen/'], ['/insights/knowledge-before-ai/', '/de/perspektiven/wissensgrundlage-vor-ki/']]) {
+      const english = pages.find(p => p.path === en).body;
+      const german = pages.find(p => p.path === de).body;
+      assert.ok(german.replace(/<[^>]+>/g, '').length > 3000, `${de}: full article required`);
+      assert.equal([...german.matchAll(/<h2>/g)].length, [...english.matchAll(/<h2>/g)].length);
+      assert.deepEqual([...german.matchAll(/href="(https:[^"]+)"/g)].map(m => m[1]), [...english.matchAll(/href="(https:[^"]+)"/g)].map(m => m[1]));
+      assert.ok(german.includes('/de/kontakt/?type=professional'));
+    }
   }
 });
 

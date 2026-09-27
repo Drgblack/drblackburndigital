@@ -60,8 +60,22 @@ try {
     await page.locator('.language-switch a[lang="en"]').click();
     await page.locator('.footer-links a[href="/privacy/"]').click();
     assert.equal(await page.locator('h1').textContent(), 'Privacy policy');
+    for (const [en, de] of [['/insights/', '/de/perspektiven/'], ['/insights/reviewing-a-learning-product/', '/de/perspektiven/lernprodukt-pruefen/'], ['/insights/knowledge-before-ai/', '/de/perspektiven/wissensgrundlage-vor-ki/']]) {
+      await page.goto(`http://127.0.0.1:${port}${en}`);
+      await page.locator('.language-switch a[lang="de"]').click();
+      assert.equal(new URL(page.url()).pathname, de);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'de');
+      await page.locator('.language-switch a[lang="en"]').click();
+      assert.equal(new URL(page.url()).pathname, en);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    }
+    for (const route of ['/portfolio/', '/greg-blackburn/', '/company/', '/404.html']) {
+      await page.goto(`http://127.0.0.1:${port}${route}`);
+      assert.equal(await page.locator('.language-switch').count(), 0);
+    }
   }
   formChecks.push('Full English/German legal pages, reciprocal switches and contact/footer language journeys passed in both builds');
+  formChecks.push('Insights index and both full articles switch directly EN/DE; untranslated pages have no misleading language switch');
   await page.setViewportSize({ width: 1440, height: 1000 });
   for (const [path, label, type] of [['/partnerships/', 'Discuss a partnership', 'partnership'], ['/portfolio/', 'Introduce a business', 'acquisition'], ['/greg-blackburn/', 'Connect with Greg', 'professional']]) {
     await page.goto(`http://127.0.0.1:4173${path}`);
