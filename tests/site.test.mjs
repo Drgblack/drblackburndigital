@@ -16,6 +16,22 @@ async function files(dir) {
 }
 const roots = ['dist', 'preview-dist'];
 
+test('every generated footer uses the approved legal labels and language routes', async () => {
+  for (const root of roots) for (const file of (await files(root)).filter(p => p.endsWith('.html'))) {
+    const html = await readFile(file, 'utf8');
+    const footer = html.match(/<footer\b[\s\S]*?<\/footer>/)?.[0];
+    assert.ok(footer, `Missing footer: ${file}`);
+    assert.doesNotMatch(footer, /draft|entwurf/i, file);
+    const de = html.includes('<html lang="de">');
+    const legalLinks = de
+      ? [['/de/impressum/', 'Impressum'], ['/de/datenschutz/', 'Datenschutz']]
+      : [['/impressum/', 'Impressum'], ['/privacy/', 'Privacy']];
+    for (const [href, label] of legalLinks) {
+      assert.ok(footer.includes(`<a href="${href}">${label}</a>`), `${file}: expected ${label} linking to ${href}`);
+    }
+  }
+});
+
 test('public builds contain no server mail configuration or server dependencies', async () => {
   for (const root of roots) for (const file of await files(root)) {
     assert.doesNotMatch(file, /(?:^|[\\/])(?:server|node_modules|\.env)(?:[\\/]|$)/);
