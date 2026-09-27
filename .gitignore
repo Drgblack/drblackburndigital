@@ -1,0 +1,17 @@
+node_modules/
+dist/
+preview-dist/
+.playwright-mcp/
+.vercel/
+artifacts/
+.env*
+!.env.example
+
+# Private local review and operator records; never publish to the public repository.
+private-review/
+draft-assets/
+docs/
+ops/
+WEBSITE-REVIEW.md
+scripts/prepare-contact-production.mjs
+scripts/export-copy.mjs

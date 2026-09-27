@@ -1,0 +1,13 @@
+node_modules/
+dist/
+preview-dist/
+private-review/
+draft-assets/
+docs/
+ops/
+artifacts/
+.playwright-mcp/
+.env*
+WEBSITE-REVIEW.md
+scripts/prepare-contact-production.mjs
+scripts/export-copy.mjs
