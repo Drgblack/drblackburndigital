@@ -1,5 +1,7 @@
 import { germanPrivacyBody } from './legal-de.mjs';
 import { responseTime } from './contact-copy.mjs';
+import { privacyConsentCopy } from './consent.mjs';
+import { legalDraftNotice } from './subscription-legal.mjs';
 
 const intro = (label, title, description) => `<section class="page-intro wrap"><p class="eyebrow">${label}</p><h1>${title}</h1><p class="lead">${description}</p></section>`;
 
@@ -7,10 +9,10 @@ function sources(de) {
   return `<div class="policy-sources"><h2>${de ? 'Informationen der Dienstleister' : 'Service information'}</h2><ul><li><a href="https://vercel.com/legal/privacy-notice">${de ? 'Vercel: Datenschutzhinweise' : 'Vercel privacy notice'}</a> · <a href="https://vercel.com/legal/dpa">${de ? 'Vereinbarung zur Auftragsverarbeitung (EN)' : 'Vercel data processing addendum'}</a></li><li><a href="https://www.namecheap.com/legal/general/privacy-policy/">${de ? 'Namecheap: Datenschutzhinweise (EN)' : 'Namecheap privacy policy'}</a></li><li><a href="https://cloud.google.com/terms/data-processing-addendum/">${de ? 'Google: Vereinbarung zur Auftragsverarbeitung für Google Workspace' : 'Google data processing addendum for Google Workspace'}</a></li></ul></div>`;
 }
 
-export function getLegalPages(company, email) {
+export function getLegalPages(company, email, analyticsEnabled = false) {
   const mail = `<a href="mailto:${email}">${email}</a>`;
   const impressumBody = de => `${intro(de ? 'Rechtliche Angaben' : 'Legal company information', 'Impressum', company)}<section class="section wrap legal-content">
-    <dl class="business-facts"><div><dt>${de ? 'Name' : 'Company'}</dt><dd>${company}</dd></div><div><dt>${de ? 'Sitz' : 'Company seat'}</dt><dd>Püttlingen, ${de ? 'Deutschland' : 'Germany'}</dd></div><div><dt>${de ? 'Ladungsfähige Anschrift' : 'Address for service'}</dt><dd>Erich-Kästner-Straße 8<br>66346 Püttlingen<br>${de ? 'Deutschland' : 'Germany'}</dd></div><div><dt>${de ? 'Gesetzlicher Vertreter' : 'Legal representative'}</dt><dd>Dr. Harvey Gregory Scott Blackburn<br>${de ? 'Geschäftsführer' : 'Managing director (Geschäftsführer)'}, ${company}<br>${de ? 'Bekannt als Dr. Greg Blackburn' : 'Known as Dr. Greg Blackburn'}</dd></div><div><dt>${de ? 'E-Mail' : 'Email'}</dt><dd>${mail}</dd></div><div><dt>${de ? 'Schneller Kontakt' : 'Fast contact'}</dt><dd><a href="${de ? '/de/kontakt/#enquiry-form' : '/contact/#enquiry-form'}">${de ? 'Anfrageformular' : 'Enquiry form'}</a></dd></div><div><dt>${de ? 'Handelsregister / HRB' : 'Commercial register / HRB'}</dt><dd>HRB 112680</dd></div><div><dt>${de ? 'Registergericht' : 'Register court'}</dt><dd>Amtsgericht Saarbrücken</dd></div></dl>
+    <dl class="business-facts"><div><dt>${de ? 'Name' : 'Company'}</dt><dd>${company}</dd></div><div><dt>${de ? 'Sitz' : 'Company seat'}</dt><dd>Püttlingen, ${de ? 'Deutschland' : 'Germany'}</dd></div><div><dt>${de ? 'Ladungsfähige Anschrift' : 'Address for service'}</dt><dd>Erich-Kästner-Straße 8<br>66346 Püttlingen<br>${de ? 'Deutschland' : 'Germany'}</dd></div><div><dt>${de ? 'Gesetzlicher Vertreter' : 'Legal representative'}</dt><dd>Dr. Harvey Gregory Scott Blackburn<br>${de ? 'Geschäftsführer' : 'Managing director (Geschäftsführer)'}, ${company}<br>${de ? 'Bekannt als Dr. Greg Blackburn' : 'Known as Dr. Greg Blackburn'}</dd></div><div><dt>${de ? 'E-Mail' : 'Email'}</dt><dd>${mail}</dd></div><div><dt>${de ? 'Schneller Kontakt' : 'Fast contact'}</dt><dd><a href="${de ? '/de/kontakt/#enquiry-form' : '/contact/#enquiry-form'}">${de ? 'Anfrageformular' : 'Enquiry form'}</a></dd></div><div><dt>${de ? 'Handelsregister / HRB' : 'Commercial register / HRB'}</dt><dd>HRB 112680</dd></div><div><dt>${de ? 'Registergericht' : 'Register court'}</dt><dd>Amtsgericht Saarbrücken</dd></div><div><dt>${de ? 'Umsatzsteuer-Identifikationsnummer (USt-IdNr)' : 'VAT identification number (USt-IdNr)'}</dt><dd>TODO-CONFIRM: ${de ? 'Nach Eingang der amtlichen Bestätigung ergänzen.' : 'Add after official confirmation arrives.'}</dd></div></dl>
     <p>${de ? responseTime.de : responseTime.en}</p>
 
   </section>`;
@@ -26,8 +28,7 @@ export function getLegalPages(company, email) {
     <h2>3. Domain and DNS</h2>
     <p>Namecheap is the domain registrar and provides authoritative DNS. DNS queries and technical metadata may be processed when resolving the domain. An authoritative DNS service typically sees queries from the visitor’s DNS resolver; this is not equivalent to receiving a complete website visit or email contents. The purpose is to make the website reachable, with Article 6(1)(f) GDPR as the legal basis.</p>
     <h2>4. Cookies, analytics and external content</h2>
-    <p>The site itself sets no cookies and uses no local browser storage. It includes no Google Analytics, Meta Pixel, Microsoft Clarity or other analytics, advertising or error-monitoring scripts. Website scripts do not call Vercel Web Analytics or Speed Insights. Technical processing by the hosting provider still takes place.</p>
-    <p>Fonts come from your device. Images and stylesheets are hosted with the website. There are no embedded videos, maps or social-media widgets. The contact form uses a locally hosted script and an endpoint on this website; no external form widget or CAPTCHA service is loaded. These implemented functions do not require a cookie-consent banner. Changes to those functions require reassessment.</p>
+    ${privacyConsentCopy(false, analyticsEnabled)}
     <h2>5. Contact form and email</h2>
     <h3>Enquiry form — fast contact</h3>
     <p>The enquiry form is live and provides an additional channel for direct contact. ${responseTime.en}</p>
@@ -53,6 +54,10 @@ export function getLegalPages(company, email) {
   const impressum = { path: '/impressum/', name: 'Impressum', title: `Impressum | ${company}`, description: 'Legal notice in English: company identity, commercial register details and contact information for Dr. Blackburn Digital.', noindex: true, body: impressumBody(false) };
   const privacy = { path: '/privacy/', name: 'Privacy', title: `Privacy policy | ${company}`, description: 'Privacy information in English covering DBD website hosting, DNS, company email, the contact form and your rights.', noindex: true, body: `${intro('Privacy', 'Privacy policy', 'How personal data is processed on this company website.')}<section class="section wrap legal-content prose">${englishPrivacy}${sources(false)}</section>` };
   const deImpressum = { path: '/de/impressum/', englishPath: '/impressum/', lang: 'de', name: 'Impressum', title: `Impressum – rechtliche Angaben | ${company}`, description: 'Impressum: Angaben zur Gesellschaft, zum Handelsregister, zum Sitz und zum Kontakt von Dr. Blackburn Digital.', noindex: true, body: impressumBody(true) };
-  const dePrivacy = { path: '/de/datenschutz/', englishPath: '/privacy/', lang: 'de', name: 'Datenschutz', title: `Datenschutzerklärung | ${company}`, description: 'Datenschutzhinweise zu Hosting, DNS, geschäftlicher E-Mail, dem Kontaktformular und Ihren Rechten auf der DBD-Website.', noindex: true, body: `${intro('Datenschutz', 'Datenschutzerklärung', 'Informationen zur Verarbeitung personenbezogener Daten auf dieser Unternehmenswebsite.')}<section class="section wrap legal-content prose">${germanPrivacyBody(company, email)}${sources(true)}</section>` };
+  const dePrivacy = { path: '/de/datenschutz/', englishPath: '/privacy/', lang: 'de', name: 'Datenschutz', title: `Datenschutzerklärung | ${company}`, description: 'Datenschutzhinweise zu Hosting, DNS, geschäftlicher E-Mail, dem Kontaktformular und Ihren Rechten auf der DBD-Website.', noindex: true, body: `${intro('Datenschutz', 'Datenschutzerklärung', 'Informationen zur Verarbeitung personenbezogener Daten auf dieser Unternehmenswebsite.')}<section class="section wrap legal-content prose">${germanPrivacyBody(company, email, analyticsEnabled)}${sources(true)}</section>` };
+  for (const page of [impressum, privacy, deImpressum, dePrivacy]) {
+    page.legalDraft = true;
+    page.body = page.body.replace(/(<section class="section wrap legal-content[^"]*">)/, `$1${legalDraftNotice(page.lang === 'de')}`);
+  }
   return { impressum, privacy, germanLegal: [deImpressum, dePrivacy] };
 }

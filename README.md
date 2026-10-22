@@ -64,8 +64,12 @@ The existing Vercel rate-limit rules are required; missing rules fail closed:
 
 Use fixed-window `rate_limit` rules matching the SDK `rate_limit_api_id`. The function supplies a keyed pseudonymous IP value to the first rule and a shared key to the second. Do not substitute IP-based infrastructure counting. The function is restricted to `fra1` for consistent regional enforcement.
 
-The application has no enquiry database, payload logging, browser storage, analytics, tracking or CAPTCHA. Vercel still processes connection metadata. The reviewed runtime-log product has 30-day retention and no log drains; this is not a guarantee for every provider record or backup. Mail enquiries that do not become a business relationship are deleted within six months of correspondence closing, subject to legal retention obligations or an open dispute. See the published Privacy notice for the full current disclosure.
+The application has no enquiry database, payload logging or CAPTCHA. Cookie settings store only the visitor’s consent choice for 180 days after a choice is made. Optional Plausible analytics is prepared but disabled until an account and the privacy review are complete; it loads only after explicit consent. Vercel still processes connection metadata. The reviewed runtime-log product has 30-day retention and no log drains; this is not a guarantee for every provider record or backup. Mail enquiries that do not become a business relationship are deleted within six months of correspondence closing, subject to legal retention obligations or an open dispute. See the published Privacy notice for the full current disclosure.
 
 ## Verification
 
 Tests cover body/field limits, validation, plain-text rendering, sender/Reply-To separation, Origin/method checks, generic errors, rate-limit failures, deployment gates, navigation, languages and unpublished-output exclusions. Browser tests mock delivery locally and do not send mail. `GET /api/contact/` exposes only the delivery-enabled status; a successful POST means SMTP acceptance. Actual inbox receipt must be confirmed separately for an end-to-end delivery test.
+
+## Legal and consent review
+
+The EN/DE Impressum, privacy, subscription terms and refund/withdrawal pages are marked DRAFT for lawyer review, including TODO-CONFIRM details. See [Phase 2 review notes](docs/PHASE-2-REVIEW.md) for unresolved facts, legal sources, consent behavior and the disabled analytics setup. `npm run test:consent:browser` tests opt-in, withdrawal and conversion events without sending real data.

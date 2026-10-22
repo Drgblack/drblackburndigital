@@ -25,6 +25,7 @@ jobs:
       - run: npm run build && npm run build:preview
       - run: npm test
       - run: npm run test:launch:browser
+      - run: npm run test:consent:browser
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,4 +33,6 @@ jobs:
           path: |
             artifacts/launch-browser-review.json
             artifacts/screenshots/launch-*.png
+            artifacts/consent-browser-review.json
+            artifacts/screenshots/consent-*.png
           if-no-files-found: ignore

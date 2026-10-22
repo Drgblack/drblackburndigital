@@ -12,6 +12,7 @@ private-review/
 draft-assets/
 docs/*
 !docs/LAUNCH.md
+!docs/PHASE-2-REVIEW.md
 ops/
 WEBSITE-REVIEW.md
 scripts/prepare-contact-production.mjs

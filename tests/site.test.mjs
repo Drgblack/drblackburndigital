@@ -199,7 +199,9 @@ test('confirmed registration details and Communardo role are used', async () => 
     const legal = await readFile(path.join(root, route, 'index.html'), 'utf8');
     assert.match(legal, /<dd>HRB 112680<\/dd>/);
     assert.match(legal, /<dd>Amtsgericht Saarbrücken<\/dd>/);
-    assert.doesNotMatch(legal, /VAT identification number|Umsatzsteuer-Identifikationsnummer|DE\d{9}/);
+    assert.match(legal, /USt-IdNr/);
+    assert.match(legal, /TODO-CONFIRM/);
+    assert.doesNotMatch(legal, /DE\d{9}/);
   }
 });
 
