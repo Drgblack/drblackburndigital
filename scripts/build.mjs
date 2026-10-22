@@ -2,12 +2,16 @@ import { mkdir, readFile, writeFile, cp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getPages, company, origin, email, profiles } from '../src/pages.mjs';
+import { isMedicalGermanEnabled } from '../src/launch.mjs';
+import { assertLaunchOutputAbsent } from './assert-launch-output.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const preview = process.argv.includes('--preview');
 // Every Vercel preview build is non-indexable, even with the normal build command.
 const staging = process.env.VERCEL_ENV === 'preview';
 const privateBuild = preview || staging;
+const showMedicalGerman = isMedicalGermanEnabled(process.env.SHOW_MEDICALGERMAN);
+const pages = getPages({ showMedicalGerman });
 const output = path.join(root, preview ? 'preview-dist' : 'dist');
 // Only these two generated directories can ever be replaced by the build.
 if (![path.join(root, 'dist'), path.join(root, 'preview-dist')].includes(output)) throw new Error('Unexpected output directory');
@@ -44,16 +48,19 @@ function schema(page) {
     const trail = [[page.lang === 'de' ? '/de/' : '/', page.lang === 'de' ? 'Startseite' : 'Home'], ...(page.parent ? [page.parent] : []), [page.path, page.name]];
     graph.push({ '@type': 'BreadcrumbList', '@id': `${origin}${page.path}#breadcrumb`, itemListElement: trail.map(([url, name], i) => ({ '@type': 'ListItem', position: i + 1, name, item: `${origin}${url}` })) });
   }
+  graph.push(...(page.structuredData || []));
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replaceAll('<', '\\u003c');
 }
 
 const navLinks = [['/portfolio/', 'Portfolio'], ['/partnerships/', 'Partnerships'], ['/greg-blackburn/', 'Greg Blackburn'], ['/insights/', 'Insights'], ['/contact/', 'Contact']];
+navLinks.splice(1, 0, ...pages.filter(page => page.navigation && page.lang !== 'de').map(page => [page.path, page.name]));
 // Only published translations can create a language switch or hreflang alternate.
-const pairs = getPages().filter(page => page.lang === 'de' && page.englishPath).map(page => [page.englishPath, page.path]);
+const pairs = pages.filter(page => page.lang === 'de' && page.englishPath).map(page => [page.englishPath, page.path]);
 function localizedLink(href, label, de) {
   if (!de) return [href, label];
   const translated = { '/': ['/de/', 'Startseite'], '/partnerships/': ['/de/partnerschaften/', 'Partnerschaften'], '/contact/': ['/de/kontakt/', 'Kontakt'], '/privacy/': ['/de/datenschutz/', 'Datenschutz'], '/impressum/': ['/de/impressum/', 'Impressum'], '/insights/': ['/de/perspektiven/', 'Perspektiven'] };
-  return translated[href] || [href, `${label === 'Company' ? 'Unternehmen' : label === 'Insights' ? 'Perspektiven' : label} (EN)`];
+  const counterpart = pages.find(page => page.lang === 'de' && page.englishPath === href);
+  return translated[href] || (counterpart ? [counterpart.path, counterpart.name] : [href, `${label === 'Company' ? 'Unternehmen' : label === 'Insights' ? 'Perspektiven' : label} (EN)`]);
 }
 function navigation(page) { return navLinks.map(([href, label]) => localizedLink(href, label, page.lang === 'de')).map(([href, label]) => `<a href="${href}"${page.path === href || page.parent?.[0] === href ? ' aria-current="page"' : ''}${href.endsWith('/contact/') || href.endsWith('/kontakt/') ? ' class="nav-contact"' : ''}>${label}</a>`).join(''); }
 function languageLinks(page) {
@@ -91,7 +98,6 @@ const assets = ['logo.png', 'favicon-96.png', 'site.css', 'contact.js', 'social-
 for (const asset of assets) await cp(path.join(root, 'assets', asset), path.join(output, 'assets', asset));
 for (const icon of ['favicon.ico', 'apple-touch-icon.png']) await cp(path.join(root, icon), path.join(output, icon));
 
-const pages = getPages(preview);
 for (const page of pages) {
   const target = path.join(output, page.path, 'index.html');
   await mkdir(path.dirname(target), { recursive: true });
@@ -102,6 +108,16 @@ await writeFile(path.join(output, '404.html'), render(notFound));
 await writeFile(path.join(output, 'robots.txt'), privateBuild ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`);
 await writeFile(path.join(output, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${privateBuild ? '' : pages.filter(p => !p.noindex).map(p => `\n  <url><loc>${origin}${p.path}</loc></url>`).join('')}\n</urlset>\n`);
 await writeFile(path.join(output, 'build-info.json'), JSON.stringify({ mode: preview ? 'local-preview' : 'pre-acquisition', generatedAt: new Date().toISOString() }, null, 2));
+if (!showMedicalGerman) {
+  try {
+    await assertLaunchOutputAbsent(output);
+  } catch (error) {
+    // output was resolved and restricted to dist/preview-dist above.
+    await rm(output, { recursive: true, force: true });
+    throw error;
+  }
+}
 // The root entry is a generated convenience copy of the safe default homepage.
-if (!privateBuild) await writeFile(path.join(root, 'index.html'), render(pages[0]));
+// Never persist gated content into the tracked convenience copy.
+if (!privateBuild && !showMedicalGerman) await writeFile(path.join(root, 'index.html'), render(pages[0]));
 console.log(`Built ${pages.length} pages in ${path.basename(output)} (${preview ? 'LOCAL PREVIEW — DO NOT DEPLOY' : 'pre-acquisition'}).`);

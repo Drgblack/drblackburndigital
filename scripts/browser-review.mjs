@@ -17,7 +17,7 @@ await mkdir('artifacts/screenshots', { recursive: true });
 try {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const [port, paths] of [[4173, getPages(false).map(p => p.path)], [4174, getPages(true).map(p => p.path)]]) {
+    for (const [port, paths] of [[4173, getPages().map(p => p.path)], [4174, getPages().map(p => p.path)]]) {
       for (const path of paths) {
         const response = await page.goto(`http://127.0.0.1:${port}${path}`);
         if (path === '/contact/' || path === '/de/kontakt/') await page.locator('#delivery-note:not([hidden])').waitFor();

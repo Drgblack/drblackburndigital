@@ -3,6 +3,7 @@ import { responseTime } from './contact-copy.mjs';
 import { refinePages } from './refinements.mjs';
 import { getGermanPages } from './german.mjs';
 import { getGermanInsights } from './insights-de.mjs';
+import { getMedicalGermanPages } from './launch.mjs';
 export const company = 'Dr. Blackburn Digital GmbH';
 export const origin = 'https://www.drblackburndigital.com';
 export const email = 'info@drblackburndigital.com';
@@ -27,7 +28,7 @@ const principles = `<div class="principles">
 
 const portfolioBefore = `<div class="portfolio-intro"><h2>Focused businesses.<br>Considered ownership.</h2><div><p>DBD is building a portfolio of focused digital businesses. We look for useful products with a clear audience and scope for sustained improvement.</p><p>Portfolio details will be shared as acquisitions are completed.</p>${link('/portfolio/', 'Our portfolio approach')}</div></div>`;
 
-export function getPages() {
+export function getPages({ showMedicalGerman = false } = {}) {
   const home = {
     path: '/', name: 'Home', title: 'Focused digital businesses | Dr. Blackburn Digital GmbH',
     description: 'Dr. Blackburn Digital GmbH acquires and grows focused digital businesses, combining technology, AI, learning expertise and disciplined operations.',
@@ -110,6 +111,7 @@ export function getPages() {
   const insights = refinePages({ home, greg, portfolio, partnerships, contact });
   const german = getGermanPages(contact);
   const pages = [home, greg, portfolio, partnerships, contact, companyPage, impressum, privacy, ...insights, ...german, ...germanLegal, ...getGermanInsights()];
+  if (showMedicalGerman) pages.push(...getMedicalGermanPages(company, origin));
   for (const page of pages) {
     page.body = page.body.replace(/<a([^>]*href="https?:[^>]+)>([\s\S]*?)<\/a>/g, (_, attrs, content) => {
       const icon = content.includes('aria-hidden="true">↗') ? '' : ` ${arrow}`;
