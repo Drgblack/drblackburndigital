@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { getPages, company, origin, email, profiles } from '../src/pages.mjs';
 import { isMedicalGermanEnabled } from '../src/launch.mjs';
 import { assertLaunchOutputAbsent } from './assert-launch-output.mjs';
+import { getAnalyticsConfig, consentMarkup } from '../src/consent.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const preview = process.argv.includes('--preview');
@@ -11,7 +12,8 @@ const preview = process.argv.includes('--preview');
 const staging = process.env.VERCEL_ENV === 'preview';
 const privateBuild = preview || staging;
 const showMedicalGerman = isMedicalGermanEnabled(process.env.SHOW_MEDICALGERMAN);
-const pages = getPages({ showMedicalGerman });
+const analytics = getAnalyticsConfig(process.env, privateBuild);
+const pages = getPages({ showMedicalGerman, analyticsEnabled: analytics.enabled });
 const output = path.join(root, preview ? 'preview-dist' : 'dist');
 // Only these two generated directories can ever be replaced by the build.
 if (![path.join(root, 'dist'), path.join(root, 'preview-dist')].includes(output)) throw new Error('Unexpected output directory');
@@ -80,21 +82,22 @@ function breadcrumb(page) {
 
 function render(page) {
   const de = page.lang === 'de';
-  const footerLinks = [['/company/', 'Company'], ...navLinks, ['/impressum/', 'Impressum'], ['/privacy/', 'Privacy']].map(([href, label]) => localizedLink(href, label, de)).map(([href, label]) => `<a href="${href}">${label}</a>`).join('');
+  const footerLinks = [['/company/', 'Company'], ...navLinks, ['/impressum/', 'Impressum'], ['/privacy/', 'Privacy'], ['/terms/', 'Terms'], ['/refunds-withdrawal/', 'Refunds & withdrawal']].map(([href, label]) => localizedLink(href, label, de)).map(([href, label]) => `<a href="${href}">${label}</a>`).join('');
+  const analyticsConfig = JSON.stringify(analytics.enabled && page.path !== '/404.html' ? { ...analytics, url: `${origin}${page.path}` } : { enabled: false }).replaceAll('<', '\\u003c');
   return `<!doctype html>
 <html lang="${de ? 'de' : 'en'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(page.title)}</title>
 <meta name="description" content="${esc(page.description)}"><link rel="canonical" href="${origin}${page.path}">${alternateTags(page)}
 ${privateBuild || page.noindex ? '<meta name="robots" content="noindex, nofollow">' : '<meta name="robots" content="index, follow">'}
 <meta property="og:type" content="${page.profile ? 'profile' : 'website'}"><meta property="og:title" content="${esc(page.title)}"><meta property="og:description" content="${esc(page.description)}"><meta property="og:url" content="${origin}${page.path}"><meta property="og:site_name" content="${company}"><meta property="og:locale" content="${de ? 'de_DE' : 'en_GB'}"><meta property="og:image" content="${origin}/assets/social-preview.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Dr. Blackburn Digital GmbH — focused digital businesses"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(page.title)}"><meta name="twitter:description" content="${esc(page.description)}"><meta name="twitter:image" content="${origin}/assets/social-preview.png">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48"><link rel="icon" type="image/png" href="/assets/favicon-96.png" sizes="96x96"><link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180"><meta name="theme-color" content="#172b3a">
-<link rel="stylesheet" href="/assets/site.css"><script type="application/ld+json">${schema(page)}</script>${page.contactForm ? '<script src="/assets/contact.js" defer></script>' : ''}</head><body>
+<link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/consent.css"><script type="application/json" id="analytics-config">${analyticsConfig}</script><script src="/assets/consent.js" defer></script><script type="application/ld+json">${schema(page)}</script>${page.contactForm ? '<script src="/assets/contact.js" defer></script>' : ''}</head><body>
 <a class="skip-link" href="#main">${de ? 'Zum Inhalt springen' : 'Skip to content'}</a>${preview ? `<div class="preview-banner" lang="en"><strong>LOCAL PREVIEW — NOT FOR PUBLICATION.</strong> Review this version locally.</div>` : ''}
 <header class="site-header"><div class="wrap header-inner"><a class="brand" href="${de ? '/de/' : '/'}" aria-label="Dr. Blackburn Digital ${de ? 'Startseite' : 'home'}"><img src="/assets/favicon-96.png" width="48" height="48" alt=""><span>Dr. Blackburn Digital<small>GmbH · ${de ? 'Deutschland' : 'Germany'}</small></span></a><nav class="desktop-nav" aria-label="${de ? 'Hauptnavigation' : 'Main'}">${navigation(page)}</nav>${languageLinks(page)}<details class="mobile-nav"><summary>${de ? 'Menü' : 'Menu'}</summary><nav aria-label="${de ? 'Mobile Navigation' : 'Mobile'}">${navigation(page)}</nav></details></div></header>
-${breadcrumb(page)}<main id="main" tabindex="-1">${page.body}</main>
-<footer class="site-footer wrap"><div class="footer-top"><div><p class="footer-brand">Dr. Blackburn Digital GmbH</p><p class="footer-tagline">${de ? 'Digitale Unternehmen erwerben,<br>betreiben und weiterentwickeln.' : 'Acquiring, operating and growing<br>focused digital businesses.'}</p><a class="text-link" href="mailto:${email}">${email}</a></div><nav class="footer-links" aria-label="${de ? 'Fußnavigation' : 'Footer'}">${footerLinks}</nav></div><div class="footer-bottom"><span>© ${new Date().getUTCFullYear()} Dr. Blackburn Digital GmbH</span><span>Püttlingen, Saarland · ${de ? 'Deutschland' : 'Germany'}</span></div></footer></body></html>`;
+${consentMarkup(de, analytics.enabled && page.path !== '/404.html')}${breadcrumb(page)}<main id="main" tabindex="-1">${page.body}</main>
+<footer class="site-footer wrap"><div class="footer-top"><div><p class="footer-brand">Dr. Blackburn Digital GmbH</p><p class="footer-tagline">${de ? 'Digitale Unternehmen erwerben,<br>betreiben und weiterentwickeln.' : 'Acquiring, operating and growing<br>focused digital businesses.'}</p><a class="text-link" href="mailto:${email}">${email}</a></div><nav class="footer-links" aria-label="${de ? 'Fußnavigation' : 'Footer'}">${footerLinks}<button class="consent-link" type="button" data-consent-open hidden>${de ? 'Cookie-Einstellungen' : 'Cookie settings'}</button></nav></div><div class="footer-bottom"><span>© ${new Date().getUTCFullYear()} Dr. Blackburn Digital GmbH</span><span>Püttlingen, Saarland · ${de ? 'Deutschland' : 'Germany'}</span></div></footer></body></html>`;
 }
 
-const assets = ['logo.png', 'favicon-96.png', 'site.css', 'contact.js', 'social-preview.png', 'greg-blackburn.jpg'];
+const assets = ['logo.png', 'favicon-96.png', 'site.css', 'consent.css', 'consent.js', 'analytics.js', 'contact.js', 'social-preview.png', 'greg-blackburn.jpg'];
 for (const asset of assets) await cp(path.join(root, 'assets', asset), path.join(output, 'assets', asset));
 for (const icon of ['favicon.ico', 'apple-touch-icon.png']) await cp(path.join(root, icon), path.join(output, icon));
 

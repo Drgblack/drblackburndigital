@@ -36,9 +36,11 @@ try {
             if (!enabled) assert.doesNotMatch(html, /medical[\s_-]*german/i, entry.path);
             assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), environment === 'preview' || entry.noindex ? 'noindex, nofollow' : 'index, follow');
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${environment}/${enabled} ${entry.path} overflows at ${width}`);
-            if (entry.navigation) {
+            if (entry.navigation || (entry.legalDraft && [1440, 390].includes(width))) {
               const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
               assert.deepEqual(axe.violations, [], `${entry.path} accessibility at ${width}`);
+            }
+            if (entry.navigation) {
               assert.equal(await page.locator('h1').textContent(), 'MedicalGerman');
               const href = entry.lang === 'de' ? '/de/medicalgerman/' : '/medicalgerman/';
               assert.equal(await page.locator(`.desktop-nav a[href="${href}"]`).count(), 1);

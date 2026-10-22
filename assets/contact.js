@@ -62,6 +62,9 @@ form.addEventListener('submit', async event => {
     const data = await response.json();
     if (!response.ok || data.ok !== true) throw new Error('Delivery unavailable');
     delivered = true;
+    // Count only successful submissions; never pass form values to analytics.
+    try { window.dbdConsent?.track(type.value === 'partnership' ? 'PartnerSubmission' : 'ContactSubmission'); }
+    catch { /* Analytics must never change the delivery outcome. */ }
     result.className = 'form-result success';
     result.innerHTML = copy.success;
     form.reset();

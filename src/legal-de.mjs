@@ -1,6 +1,7 @@
 import { responseTime } from './contact-copy.mjs';
+import { privacyConsentCopy } from './consent.mjs';
 // German privacy notice; kept in full alongside its English counterpart.
-export const germanPrivacyBody = (company, email) => `<h2>1. Verantwortlicher und Kontakt</h2>
+export const germanPrivacyBody = (company, email, analyticsEnabled = false) => `<h2>1. Verantwortlicher und Kontakt</h2>
 <p>Verantwortlicher ist ${company}, vertreten durch Dr. Harvey Gregory Scott Blackburn (bekannt als Dr. Greg Blackburn), Geschäftsführer. Ladungsfähige Anschrift: Erich-Kästner-Straße 8, 66346 Püttlingen, Deutschland. E-Mail: <a href="mailto:${email}">${email}</a>.</p>
 <h2>2. Bereitstellung und Sicherheit der Website</h2>
 <p><strong>Aktueller Betrieb — Hosting und Infrastruktur:</strong> Vercel stellt das Hosting bereit und verarbeitet Hostingdaten in unserem Auftrag. Beim Abruf verarbeitet die Infrastruktur technisch erforderliche Verbindungs- und Anfragedaten, insbesondere die IP-Adresse und Angaben zur angeforderten Ressource. Dazu können Zeitstempel, Browserinformationen, Statuscodes und gegebenenfalls die verweisende Seite gehören. Diese Verarbeitung dient der Auslieferung, Zuverlässigkeit und Sicherheit der Website. Direkte E-Mail-Anfragen werden über Google Workspace verarbeitet; ihre Inhalte werden dabei nicht über diese Website an Vercel übermittelt.</p>
@@ -11,8 +12,7 @@ export const germanPrivacyBody = (company, email) => `<h2>1. Verantwortlicher un
 <h2>3. Domain und DNS</h2>
 <p>Die Domain ist bei Namecheap registriert und verwendet dessen autoritative Nameserver. Bei der Namensauflösung können DNS-Anfragen und technische Metadaten verarbeitet werden. Autoritative DNS-Dienste sehen typischerweise die Anfrage des verwendeten DNS-Resolvers; dies ist nicht mit einem vollständigen Websitebesuch oder dem Inhalt einer E-Mail gleichzusetzen. Zweck ist die Erreichbarkeit der Website; Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>
 <h2>4. Cookies, Reichweitenmessung und externe Inhalte</h2>
-<p>Die Website selbst setzt keine Cookies und nutzt keinen lokalen Browserspeicher. Es sind keine Google-Analytics-, Meta-Pixel- oder Microsoft-Clarity-Skripte eingebunden. Auch andere Analyse-, Werbe- oder Fehlerüberwachungs-Skripte sind in dieser Implementierung nicht enthalten. Vercel Web Analytics und Speed Insights werden nicht durch Website-Skripte aufgerufen. Technische Verarbeitung durch den Hoster bleibt davon unberührt.</p>
-<p>Schriftarten stammen vom Gerät des Besuchers. Bilder und Stylesheets werden zusammen mit der Website ausgeliefert. Es gibt keine eingebetteten Videos, Karten oder Social-Media-Widgets. Das Kontaktformular verwendet ein lokal bereitgestelltes Skript und einen Endpunkt derselben Website; externe Formular-Widgets oder CAPTCHA-Dienste werden nicht geladen. Für die hier implementierten Funktionen ist kein Cookie-Einwilligungsbanner erforderlich. Änderungen an diesen Funktionen erfordern eine erneute Prüfung.</p>
+${privacyConsentCopy(true, analyticsEnabled)}
 <h2>5. Kontaktformular und E-Mail</h2>
 <h3>Anfrageformular — schneller Kontakt</h3>
 <p>Das Anfrageformular ist aktiv und bietet einen zusätzlichen Kanal für den direkten Kontakt. ${responseTime.de}</p>

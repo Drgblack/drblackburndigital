@@ -22,9 +22,12 @@ export async function withLaunchBuild(run) {
     await mkdir(path.join(workspace, 'scripts'));
     for (const directory of ['src', 'assets']) await cp(directory, path.join(workspace, directory), { recursive: true });
     for (const file of ['scripts/build.mjs', 'scripts/assert-launch-output.mjs', 'favicon.ico', 'apple-touch-icon.png']) await cp(file, path.join(workspace, file));
-    const build = async ({ flag, environment = 'production', preview = false } = {}) => {
+    const build = async ({ flag, environment = 'production', preview = false, analytics = false } = {}) => {
       const env = { ...process.env, VERCEL_ENV: environment };
       delete env.SHOW_MEDICALGERMAN;
+      delete env.ANALYTICS_ENABLED;
+      delete env.PLAUSIBLE_DOMAIN;
+      if (analytics) { env.ANALYTICS_ENABLED = 'true'; env.PLAUSIBLE_DOMAIN = 'drblackburndigital.com'; }
       if (flag !== undefined) env.SHOW_MEDICALGERMAN = flag;
       await promisify(execFile)(process.execPath, ['scripts/build.mjs', ...(preview ? ['--preview'] : [])], { cwd: workspace, env });
       return path.join(workspace, preview ? 'preview-dist' : 'dist');

@@ -154,7 +154,7 @@ try {
   assert.deepEqual(await context.cookies(), []);
   assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
   assert.deepEqual(requests.filter(url => !url.startsWith('http://127.0.0.1:')), []);
-  formChecks.push('No cookies, browser storage or third-party browser requests observed');
+  formChecks.push('Before any consent choice: no cookies, browser storage or third-party browser requests observed');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('http://127.0.0.1:4173/');
   await page.keyboard.press('Tab');

@@ -133,3 +133,7 @@ incident, restore the recorded known-good flag-off Production deployment,
 then correct the Production variable before the next build. Search engines
 may retain previously indexed launch URLs until they recrawl them; rollback
 removes them from the site but cannot instantly clear external indexes.
+
+## Phase 2 review material
+
+The corporate legal drafts and consent controls are documented in [PHASE-2-REVIEW.md](PHASE-2-REVIEW.md). Analytics remains disabled: an account and confirmed provider/privacy details are required before enabling collection. This analytics switch is separate from the product launch switch.
