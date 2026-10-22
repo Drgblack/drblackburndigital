@@ -10,7 +10,8 @@ artifacts/
 # Private local review and operator records; never publish to the public repository.
 private-review/
 draft-assets/
-docs/
+docs/*
+!docs/LAUNCH.md
 ops/
 WEBSITE-REVIEW.md
 scripts/prepare-contact-production.mjs

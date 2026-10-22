@@ -98,7 +98,7 @@ test('each page has one heading, canonical, unique metadata and valid linked ent
   for (const root of roots) {
     const titles = new Set();
     const descriptions = new Set();
-    for (const p of getPages(root === 'preview-dist')) {
+    for (const p of getPages()) {
       const html = await readFile(path.join(root, p.path, 'index.html'), 'utf8');
       assert.doesNotMatch(html, /i\.G\.|in formation|in Gründung|registration pending|Eintragung ausstehend/i, `Outdated registration status on ${p.path}`);
       assert.equal([...html.matchAll(/<h1(?:\s|>)/g)].length, 1, p.path);
@@ -132,7 +132,7 @@ test('each page has one heading, canonical, unique metadata and valid linked ent
 
 test('all important pages are reachable by static HTML links, with ordered headings and no staging URLs', async () => {
   for (const root of roots) {
-    const pages = getPages(root === 'preview-dist');
+    const pages = getPages();
     const graph = new Map();
     for (const page of pages) {
       const html = await readFile(path.join(root, page.path, 'index.html'), 'utf8');
@@ -151,7 +151,7 @@ test('all important pages are reachable by static HTML links, with ordered headi
 test('sitemap contains only the canonical indexable default pages', async () => {
   const sitemap = await readFile('dist/sitemap.xml', 'utf8');
   const actual = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
-  assert.deepEqual(actual, getPages(false).filter(p => !p.noindex).map(p => `${origin}${p.path}`));
+  assert.deepEqual(actual, getPages().filter(p => !p.noindex).map(p => `${origin}${p.path}`));
   const robots = await readFile('dist/robots.txt', 'utf8');
   assert.match(robots, /Allow: \//);
   assert.doesNotMatch(robots, /Disallow:/);
@@ -165,7 +165,7 @@ test('Vercel preview environment cannot produce indexable pages even with the no
   try {
     await mkdir(path.join(temporaryRoot, 'scripts'));
     for (const directory of ['src', 'assets']) await cp(directory, path.join(temporaryRoot, directory), { recursive: true });
-    for (const file of ['scripts/build.mjs', 'favicon.ico', 'apple-touch-icon.png']) await cp(file, path.join(temporaryRoot, file));
+    for (const file of ['scripts/build.mjs', 'scripts/assert-launch-output.mjs', 'favicon.ico', 'apple-touch-icon.png']) await cp(file, path.join(temporaryRoot, file));
     await promisify(execFile)(process.execPath, ['scripts/build.mjs'], { cwd: temporaryRoot, env: { ...process.env, VERCEL_ENV: 'preview' } });
     for (const file of (await files(path.join(temporaryRoot, 'dist'))).filter(file => file.endsWith('.html'))) assert.match(await readFile(file, 'utf8'), /name="robots" content="noindex, nofollow"/);
     assert.doesNotMatch(await readFile(path.join(temporaryRoot, 'dist/sitemap.xml'), 'utf8'), /<loc>/);
