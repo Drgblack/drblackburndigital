@@ -100,7 +100,7 @@ test('each page has one heading, canonical, unique metadata and valid linked ent
     const descriptions = new Set();
     for (const p of getPages(root === 'preview-dist')) {
       const html = await readFile(path.join(root, p.path, 'index.html'), 'utf8');
-      assert.doesNotMatch(html, /GmbH(?! i\.G\.)/, `Formation suffix missing on ${p.path}`);
+      assert.doesNotMatch(html, /i\.G\.|in formation|in Gründung|registration pending|Eintragung ausstehend/i, `Outdated registration status on ${p.path}`);
       assert.equal([...html.matchAll(/<h1(?:\s|>)/g)].length, 1, p.path);
       assert.ok(html.includes(`rel="canonical" href="${origin}${p.path}"`));
       assert.ok(html.includes(`name="robots" content="${root === 'preview-dist' || p.noindex ? 'noindex, nofollow' : 'index, follow'}"`));
@@ -108,7 +108,7 @@ test('each page has one heading, canonical, unique metadata and valid linked ent
       assert.ok(!descriptions.has(p.description), p.description); descriptions.add(p.description);
       const schema = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
       const org = schema['@graph'].find(e => e['@type'] === 'Organization');
-      assert.equal(org.legalName, 'Dr. Blackburn Digital GmbH i.G.');
+      assert.equal(org.legalName, 'Dr. Blackburn Digital GmbH');
       const person = schema['@graph'].find(e => e['@type'] === 'Person');
       if (org.founder) assert.equal(org.founder['@id'], person['@id']);
       if (person) assert.equal(person.worksFor['@id'], org['@id']);
@@ -190,14 +190,17 @@ test('company pages contain only the corporate organisation', async () => {
   }
 });
 
-test('confirmed formation status and Communardo role are used without registry inventions', async () => {
+test('confirmed registration details and Communardo role are used', async () => {
   const profile = await readFile('dist/greg-blackburn/index.html', 'utf8');
   assert.match(profile, /Former Head of Knowledge Management &amp; Learning at Communardo/);
   assert.match(profile, /Knowledge &amp; Learning Centre/);
   assert.doesNotMatch(profile, /Chief Learning Officer/);
-  const legal = await readFile('dist/impressum/index.html', 'utf8');
-  assert.match(legal, /Company in formation/);
-  assert.doesNotMatch(legal, /HRB\s*\d|Amtsgericht\s+\w/);
+  for (const root of roots) for (const route of ['impressum', 'de/impressum']) {
+    const legal = await readFile(path.join(root, route, 'index.html'), 'utf8');
+    assert.match(legal, /<dd>HRB 112680<\/dd>/);
+    assert.match(legal, /<dd>Amtsgericht Saarbrücken<\/dd>/);
+    assert.doesNotMatch(legal, /VAT identification number|Umsatzsteuer-Identifikationsnummer|DE\d{9}/);
+  }
 });
 
 test('translated pages have reciprocal language alternates and retain the shared form contract', async () => {
