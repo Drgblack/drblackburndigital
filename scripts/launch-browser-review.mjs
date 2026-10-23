@@ -36,7 +36,7 @@ try {
             if (!enabled) assert.doesNotMatch(html, /medical[\s_-]*german/i, entry.path);
             assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), environment === 'preview' || entry.noindex ? 'noindex, nofollow' : 'index, follow');
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${environment}/${enabled} ${entry.path} overflows at ${width}`);
-            if (entry.navigation || (entry.legalDraft && [1440, 390].includes(width))) {
+            if (entry.launchContent || (entry.legalDraft && [1440, 390].includes(width))) {
               const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
               assert.deepEqual(axe.violations, [], `${entry.path} accessibility at ${width}`);
             }
@@ -49,12 +49,36 @@ try {
                 assert.ok(await page.locator(`.mobile-nav a[href="${href}"]`).isVisible());
                 await page.locator('.mobile-nav summary').click();
               }
-              if (environment === 'preview' && [1440, 390].includes(width)) await page.screenshot({ path: `artifacts/screenshots/launch-${entry.lang || 'en'}-${width}.png`, fullPage: true });
+
+            }
+            if (entry.launchContent) {
+              assert.equal(await page.locator('h1').count(), 1);
+              const counterpart = entry.lang === 'de' ? entry.englishPath : pages.find(candidate => candidate.englishPath === entry.path).path;
+              const alternateLanguage = entry.lang === 'de' ? 'en' : 'de';
+              assert.equal(await page.locator(`.language-switch a[lang="${alternateLanguage}"]`).getAttribute('href'), counterpart);
+              if (width === 1440) {
+                await page.locator(`.language-switch a[lang="${alternateLanguage}"]`).click();
+                assert.equal(new URL(page.url()).pathname, counterpart);
+                await page.goto(server.origin + entry.path);
+                if (entry.navigation) {
+                  const graph = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
+                  const faq = graph.find(node => node['@type'] === 'FAQPage');
+                  for (const question of faq.mainEntity) {
+                    assert.ok(await page.getByRole('heading', { name: question.name, exact: true }).isVisible());
+                    assert.ok(await page.locator('#faq').getByText(question.acceptedAnswer.text, { exact: true }).isVisible());
+                  }
+                  const billing = entry.lang === 'de' ? '/de/medicalgerman/abrechnung/' : '/medicalgerman/billing/';
+                  await page.locator(`main a[href="${billing}"]`).first().click();
+                  assert.equal(new URL(page.url()).pathname, billing);
+                  await page.goto(server.origin + entry.path);
+                }
+              }
+              if (environment === 'preview' && [1440, 390].includes(width)) await page.screenshot({ path: `artifacts/screenshots/launch-${entry.path.replaceAll('/', '-').replace(/^-|-$/g, '') || 'home'}-${width}.png`, fullPage: true });
             }
             results.push({ environment, enabled, route: entry.path, width });
           }
         }
-        for (const route of ['/medicalgerman/', '/de/medicalgerman/']) {
+        for (const route of ['/medicalgerman/', '/de/medicalgerman/', '/medicalgerman/billing/', '/de/medicalgerman/abrechnung/', '/de/portfolio/', '/assets/medicalgerman-en.png', '/assets/medicalgerman-de.png']) {
           const response = await page.goto(server.origin + route);
           assert.equal(response.status(), enabled ? 200 : 404, route);
           if (!enabled) assert.doesNotMatch(await page.content(), /medical[\s_-]*german/i);

@@ -3,7 +3,7 @@ import { responseTime } from './contact-copy.mjs';
 import { refinePages } from './refinements.mjs';
 import { getGermanPages } from './german.mjs';
 import { getGermanInsights } from './insights-de.mjs';
-import { getMedicalGermanPages } from './launch.mjs';
+import { getMedicalGermanPages, getMedicalGermanPortfolioPages, medicalGermanPortfolioEntry } from './medicalgerman.mjs';
 import { getSubscriptionLegalPages } from './subscription-legal.mjs';
 export const company = 'Dr. Blackburn Digital GmbH';
 export const origin = 'https://www.drblackburndigital.com';
@@ -35,7 +35,7 @@ export function getPages({ showMedicalGerman = false, analyticsEnabled = false }
     description: 'Dr. Blackburn Digital GmbH acquires and grows focused digital businesses, combining technology, AI, learning expertise and disciplined operations.',
     body: `<section class="hero wrap"><div class="hero-main"><p class="eyebrow"><span class="status-dot"></span> Dr. Blackburn Digital GmbH</p><h1>We acquire and grow <em>focused digital businesses.</em></h1><p class="lead">Dr. Blackburn Digital GmbH (DBD) is a registered German company, founded to acquire, operate and grow focused digital businesses. We bring technology, AI and learning expertise to long-term product improvement.</p><div class="actions">${link('/portfolio/', 'Explore our portfolio', 'button')}${link('/contact/?type=partnership', 'Discuss a partnership')}</div></div><aside class="hero-aside" aria-label="Our perspective"><div class="brand-panel"><img src="/assets/logo.png" width="1056" height="372" alt="" aria-hidden="true"><p>An operating company.<br>A long-term perspective.</p></div><div class="location-line"><span>Saarland, Germany</span><span>International outlook</span></div></aside></section>
     <div class="intro-strip"><div class="wrap"><span>Focused markets</span><span>Useful products</span><span>Evidence-led decisions</span><span>Disciplined operations</span></div></div>
-    <section class="section wrap" id="portfolio">${sectionHead('01', 'Our portfolio')}${portfolioBefore}</section>
+    <section class="section wrap" id="portfolio">${sectionHead('01', 'Our portfolio')}${showMedicalGerman ? medicalGermanPortfolioEntry(false, true) : portfolioBefore}</section>
     <section class="section soft-section"><div class="wrap">${sectionHead('02', 'How we operate')}<div class="section-heading"><h2>Better products are built<br>through everyday decisions.</h2><p>Our work starts with understanding a business and continues through the practical work of improving it.</p></div>${principles}</div></section>
     <section class="section wrap split-section">${sectionHead('03', 'Partnerships')}<div class="split-content"><h2>Good partnerships<br>start with shared purpose.</h2><div><p>We welcome conversations with organisations whose expertise, audiences or services connect with our portfolio businesses.</p><p>${'Our role is to provide a clear corporate counterpart and an informed route into the right product conversation.'}</p>${link('/partnerships/', 'Working with DBD')}</div></div></section>
     <section class="section founder-section"><div class="wrap founder-grid"><div class="founder-summary"><p class="eyebrow">Meet the founder</p><h2>Dr. Greg Blackburn</h2><p class="role">Founder &amp; CEO<br>Dr. Blackburn Digital GmbH</p><p>More than 20 years across professional education, digital learning and technology. Now focused on acquiring, operating and improving specialist digital businesses.</p>${link('/greg-blackburn/', 'Greg’s background & approach')}</div><div class="founder-evidence"><p class="large-stat">20+<span>years in learning &amp; technology</span></p><div class="credential-line"><span>PhD</span><p>Professional Education<br><small>City, University of London</small></p></div><div class="credential-line"><span>MBA</span><p>Business administration<br><small>University of Queensland</small></p></div><p class="small-note">Professional experience across Europe and Australia.</p></div></div></section>
@@ -110,9 +110,15 @@ export function getPages({ showMedicalGerman = false, analyticsEnabled = false }
   greg.body = greg.body.replace(sectionHead('04', 'Current role'), sectionHead('05', 'Current role'));
   for (const page of [home, portfolio]) page.body = page.body.replaceAll('width="720" height="1280"', 'width="711" height="909"');
   const insights = refinePages({ home, greg, portfolio, partnerships, contact });
-  const german = getGermanPages(contact);
+  const german = getGermanPages(contact, showMedicalGerman);
   const pages = [home, greg, portfolio, partnerships, contact, companyPage, impressum, privacy, ...insights, ...german, ...germanLegal, ...getGermanInsights(), ...getSubscriptionLegalPages(company, email)];
-  if (showMedicalGerman) pages.push(...getMedicalGermanPages(company, origin));
+  if (showMedicalGerman) {
+    const [englishPortfolio, germanPortfolio] = getMedicalGermanPortfolioPages(company);
+    pages[pages.indexOf(portfolio)] = englishPortfolio;
+    home.launchContent = true;
+    german.find(page => page.path === '/de/').launchContent = true;
+    pages.push(germanPortfolio, ...getMedicalGermanPages(company, origin, email));
+  }
   for (const page of pages) {
     page.body = page.body.replace(/<a([^>]*href="https?:[^>]+)>([\s\S]*?)<\/a>/g, (_, attrs, content) => {
       const icon = content.includes('aria-hidden="true">↗') ? '' : ` ${arrow}`;

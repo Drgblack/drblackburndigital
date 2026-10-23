@@ -2,11 +2,13 @@
 
 ## Review status
 
-Phase 1 supplies the build-time switch and bilingual review scaffolding only.
+Phase 1 supplies the build-time switch. Phase 3 replaces its review scaffolding
+with bilingual product, portfolio and billing-help drafts plus share images.
 Do not enable Production until the acquisition has closed, phases 2–6 have
 been reviewed and merged, all TODO-CONFIRM facts have been resolved, and the
 legal drafts have received lawyer approval. Each phase has a separate PR and
-review stop. The placeholder product pages are not finished launch copy.
+review stop. The product pages still contain explicit placeholders, not finished
+launch copy. Resolve those facts during review before activating the flag.
 
 No MedicalGerman repository or live product source is needed for this work.
 Write original copy from the approved brief and mark unknown facts
@@ -38,7 +40,7 @@ path and file (including shared assets) and removes failed output. The
 tracked root `index.html` is only refreshed by flag-off, non-preview builds;
 never deploy the repository root or `preview-dist`.
 
-Phase 1 review routes are `/medicalgerman/` and `/de/medicalgerman/`.
+Product review routes are `/medicalgerman/` and `/de/medicalgerman/`.
 Navigation, language alternates, sitemap entries and Product structured data
 are derived from the same gated page collection. Keep future product pages
 and modifications to existing pages behind that same flag. Any future product
@@ -122,6 +124,61 @@ complete and approved.
 
 Items for phases 2–6 are release requirements, not claims that Phase 1 has
 implemented them.
+
+## Phase 3 review material
+
+With the flag on, review these language pairs:
+
+| Content | English | German |
+| --- | --- | --- |
+| Home portfolio entry | `/` | `/de/` |
+| Portfolio | `/portfolio/` | `/de/portfolio/` |
+| Product, preparation, pricing and FAQ | `/medicalgerman/` | `/de/medicalgerman/` |
+| Invoices, cancellation and support | `/medicalgerman/billing/` | `/de/medicalgerman/abrechnung/` |
+
+The existing English portfolio and both home entries change only in flag-on
+builds. The German portfolio, product and billing pages do not exist when off.
+Their language alternates, nav entries, schema and image references follow the
+same gated page collection. The default site remains unchanged by Phase 3.
+
+`src/medicalgerman.mjs` holds original EN/DE copy based only on the brief. No
+MedicalGerman repository, live product source, logo or screenshot was accessed.
+The outbound link uses only the supplied `https://medicalgerman.app` address;
+automated checks do not visit it. Verify that destination after closing.
+
+Confirm before release in both languages:
+
+- Closing, operator transition and permission to publish the operator statement.
+- Product scope, supported professions, exams, regions and starting level.
+- Actual learning journey, topics, practice, feedback, access and device support.
+- Plans, inclusions, amounts, currency, VAT, billing periods, renewal and trials.
+- Invoice access/delivery, issuing entity and correction procedure.
+- Subscription-management and cancellation links, notice, confirmation and access end.
+- Product support channel, responsibilities and response times.
+
+The billing page is guidance, not a working cancellation interface. It links to
+the existing DBD contact channels and legal drafts. It does not claim that
+sending a general enquiry cancels a subscription. The draft legal documents
+still require review under Phase 2.
+
+Product pages contain the existing Organization entity plus Product and FAQPage
+JSON-LD. FAQ markup and visible answers use the same source data; unknown offers,
+prices, ratings and exam claims are omitted. The Product entity is the page's
+main entity. This is structured data, not a promise of search rich results.
+Reference vocabulary: [Product](https://schema.org/Product),
+[FAQPage](https://schema.org/FAQPage).
+
+The EN/DE share cards use original typography and the existing DBD mark. They
+are not MedicalGerman brand assets. Rebuild with
+`node scripts/render-product-social.mjs` (local Chrome required); committed
+1200 × 630 PNGs are copied only with the flag on. Vercel does not render images
+or need Chrome during its build.
+
+Tests cover both flag states, stale-output cleanup (including images), all local
+links/assets/anchors, schema/visible FAQ parity, canonical and reciprocal
+hreflang, and 404s for gated routes and images. Playwright exercises all eight
+changed/new pages at four widths with axe in production and preview modes.
+Every preview page remains noindex. No analytics provider is enabled by Phase 3.
 
 ## Roll back visibility
 
